@@ -23,7 +23,7 @@ begin
 end;
 $$;
 
-call change_task_status(3, 2);
+
 
 
 --создание задачи 
@@ -45,4 +45,4 @@ insert into task_status_history(task_id, status_id, valid_from, is_current) valu
 
 end; $$;
 
-call create_task(1, 2, 'Подготовить отчет', '2026-03-01');
+
