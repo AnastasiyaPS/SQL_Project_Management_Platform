@@ -12,7 +12,7 @@ insert into status(status_name) values
 ('Архивирована');
 
 
-Select * from status
+Select * from status;
 
 insert into tag (tag_name) values
 ('баг'),
@@ -33,7 +33,7 @@ insert into tag (tag_name) values
 ('улучшение');
 
 
-Select * from tag
+Select * from tag;
 
 insert into Project(project_name, project_description, start_date, end_date) values
 ('CRM система', 'Разработка CRM для отдела продаж', '2025-01-01', '2025-06-30'),
@@ -54,7 +54,7 @@ insert into project(project_name, project_description, start_date, end_date) val
 ('Хранилище документов', 'Файлы и версии', '2026-01-01', '2026-12-01');
 
 
-Select * from Project
+Select * from Project;
 
 insert into users (full_name, email, role) values
 ('Иванов Иван', 'ivanov@mail.ru', 'Developer'),
@@ -75,7 +75,7 @@ insert into users (full_name, email, role) values
 ('Семенова Дарья', 'semenova@mail.ru', 'DevOps');
 
 
-Select * from users
+Select * from users;
 
 
 
@@ -94,7 +94,7 @@ insert into project_users (project_id, user_id, project_role) values
 
 
 
-Select * from project_users
+Select * from project_users;
 
 
 insert into  task (project_id, assigned_user_id, current_status_id, title, description, due_date) values
@@ -112,11 +112,11 @@ insert into  task (project_id, assigned_user_id, current_status_id, title, descr
 (4, 5, 1, 'Сбор данных', 'Источники данных', '2026-05-01'),
 (4, 1, 2, 'ETL процесс', 'Загрузка данных', '2026-05-10'),
 (5, 4, 1, 'Docker окружение', 'Контейнеризация', '2026-06-01'),
-(5, 3, 2, 'Документация CI/CD', 'Описание пайплайнов', '2026-06-10')
+(5, 3, 2, 'Документация CI/CD', 'Описание пайплайнов', '2026-06-10');
 
 
 
-select * from task
+select * from task;
 
 insert into task_tags (task_id, tag_id) values
 (1,6),(1,10),(1,9),
@@ -133,7 +133,7 @@ insert into task_tags (task_id, tag_id) values
 (12,6),(12,10),
 (13,9),(13,3),
 (14,6),(14,10),
-(15,4),(15,9)
+(15,4),(15,9);
 
 insert into task_status_history (task_id, status_id, valid_from, valid_to, is_current) values
 (1,1,'2026-01-01','2026-01-05',false),
@@ -159,7 +159,7 @@ insert into task_status_history (task_id, status_id, valid_from, valid_to, is_cu
 (13,1,'2026-05-01',null,true),
 (14,1,'2026-05-05','2026-05-20',false),
 (14,2,'2026-05-20',null,true),
-(15,1,'2026-06-01',null,true)
+(15,1,'2026-06-01',null,true);
 
 insert into comments (task_id, user_id, comment_text) values
 (1,3,'Необходимо уточнить требования'),
@@ -176,6 +176,7 @@ insert into comments (task_id, user_id, comment_text) values
 (9,5,'Документация обновлена'),
 (10,1,'API готово'),
 (11,2,'Тесты пройдены'),
-(12,5,'Источники данных определены')
+(12,5,'Источники данных определены');
 
-select * from comments
+
+select * from comments;
