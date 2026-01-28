@@ -155,5 +155,8 @@ where u2.role = 'QA'
 group by u2.user_id
 );
 
---
+--вызов процедур 
+call change_task_status(3, 2);
+call create_task(1, 2, 'Подготовить отчет', '2026-03-01');
+
 
