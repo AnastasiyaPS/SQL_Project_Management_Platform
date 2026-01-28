@@ -1,0 +1,65 @@
+name: DB Pipeline (PostgreSQL)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  init-db:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: project_db
+          POSTGRES_USER: project_user
+          POSTGRES_PASSWORD: project_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U project_user -d project_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install psql
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run DB scripts (Bash)
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: project_user
+          PGPASSWORD: project_pass
+          PGDATABASE: project_db
+        run: |
+          set -e
+          echo "Running SQL scripts..."
+          psql -v ON_ERROR_STOP=1 -f Scripts/Script_tables.sql
+          psql -v ON_ERROR_STOP=1 -f Scripts/Script_check.sql
+          psql -v ON_ERROR_STOP=1 -f Scripts/Script_index.sql
+          psql -v ON_ERROR_STOP=1 -f Scripts/Script_procedure.sql
+          psql -v ON_ERROR_STOP=1 -f Scripts/Script_view.sql
+          psql -v ON_ERROR_STOP=1 -f Scripts/Script_insert.sql
+          psql -v ON_ERROR_STOP=1 -f Scripts/Script_request.sql
+          echo "DB init completed."
+
+      - name: Smoke test
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: project_user
+          PGPASSWORD: project_pass
+          PGDATABASE: project_db
+        run: |
+          set -e
+          psql -c "select count(*) as users_cnt from users;"
+          psql -c "select count(*) as tasks_cnt from task;"
+          psql -c "select count(*) as history_cnt from task_status_history;"
