@@ -167,4 +167,5 @@ drop constraint task_status_history_task_id_fkey;
 alter table task_status_history
 add constraint task_status_history_task_id_fkey
 foreign key (task_id)
-references task(task_id) on delete cascade;
+references task(task_id)
+on delete cascade;

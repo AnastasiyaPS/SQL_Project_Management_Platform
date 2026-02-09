@@ -34,4 +34,3 @@ tsh.valid_to
 from task_status_history tsh
 join task t on t.task_id=tsh.task_id
 join status s on s.status_id=tsh.status_id;
-

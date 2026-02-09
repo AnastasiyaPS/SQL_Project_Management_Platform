@@ -16,7 +16,7 @@ LIMIT/OFFSET
 select task_id, title, description
 from task 
 where project_id  = 1
-order by due_date ;
+order by due_date;
 
 --2
 /* список задач с названием проекта и исполнителем 
@@ -25,44 +25,45 @@ select t.task_id, t.title, p.project_name, u.full_name
 from task t 
 inner join project p on t.project_id = p.project_id
 inner join users u on u.user_id = t.assigned_user_id
-order by task_id ;
+order by task_id;
 
 --3
 /* все задачи  с исполнителями и без исполнителей */
 select t.task_id, t.title, u.full_name 
 from task t 
 left join users u on u.user_id = t.assigned_user_id
-order by task_id ;
+order by task_id;
 
 --4
 /* Все пользователи и назначенные им задачи  */
 select u.full_name, t.title
 from task t 
 right join users u on u.user_id = t.assigned_user_id
-order by u.user_id ;
+order by u.user_id; 
 
 --5
 /* Количество задач в каждом проекте */
 select p.project_id, p.project_name , count(*) as count_task
 from task t 
 inner join project p on t.project_id = p.project_id
-group by p.project_id 
-order by p.project_id  ;
+group by p.project_id,p.project_name 
+order by p.project_id;  
+
+
 
 --6
 /* проекты с больше чем 2 задачами  */
 select p.project_id, p.project_name
 from task t 
 inner join project p on t.project_id = p.project_id
-group by p.project_id 
+group by p.project_id , p.project_name
 having count(*)>2;
 
 --7
 /* задачи, у которых срок выполнения позже среднего срока по всем задачам*/ 
 select task_id, title, due_date  
 from task 
-where due_date > 
-  (select TO_TIMESTAMP(AVG(extract(EPOCH from due_date)))
+where due_date > (select TO_TIMESTAMP(AVG(extract(EPOCH from due_date)))
 from task);
 
 --8 
@@ -82,24 +83,26 @@ from project
 where exists(
 select 1 
 from task t
-join project p on t.project_id=p.project_id);
+where t.project_id=project.project_id);
 
 --10 
 /* задачи, срок которых больше любого срока задач проекта 1 */ 
 
 select title 
 from task 
-where due_date> any (
+where due_date> all (
 select due_date 
 from task where project_id=1
 );
 
 --11
 /* задачи одного проекта с одинаковым исполнителем */
-select
+select t1.project_id, t1.assigned_user_id, t1.task_id, t1.title, t2.task_id, t2.title, u.full_name
 from task t1
-join task t2 on t1.project_id=t2.project_id and t1.assigned_user_id=t2.assigned_user_id and t1.task_id<t2.task_id;
-
+join task t2 on t1.project_id=t2.project_id and t1.assigned_user_id=t2.assigned_user_id and t1.task_id<t2.task_id
+join users u on u.user_id = t1.assigned_user_id
+where t1.assigned_user_id is not null
+order by t1.project_id, t1.assigned_user_id, t1.task_id;
 
 
 
@@ -155,8 +158,50 @@ where u2.role = 'QA'
 group by u2.user_id
 );
 
---вызов процедур 
-call change_task_status(3, 2);
-call create_task(1, 2, 'Подготовить отчет', '2026-03-01');
+--17
+/* вывести  проекты, задачи и исполнители
+ * даже если им не назначены исполнители или исполнителям задачи */
+select p.project_name, t.title, u.full_name, s.status_name 
+from project p 
+full join task t using(project_id)
+full join users u on u.user_id = t.assigned_user_id 
+left join status s on s.status_id = t.current_status_id
+order by p.project_name, t.title, u.full_name, s.status_name ;
 
+--18
+--первые 3 задачи по времени окончания (самые последние)
+select *
+from task t 
+order by due_date desc, task_id
+limit 3;
+
+--19
+/* рекурсивный запрос история изменения статусов задач*/
+
+/* Рекурсивный запрос:
+история изменения статусов задач */
+
+with recursive status_flow (task_id, status_id, valid_from, valid_to) as (
+    select tsh.task_id, tsh.status_id, tsh.valid_from, tsh.valid_to
+    from task_status_history tsh
+    where tsh.valid_from = (
+        select min(t2.valid_from)
+        from task_status_history t2
+        where t2.task_id = tsh.task_id
+    )
+    union all
+    
+    select tt.task_id, tt.status_id, tt.valid_from, tt.valid_to
+    from task_status_history tt
+    join status_flow sf
+      on sf.task_id = tt.task_id
+    where tt.valid_from = (
+         select min(t3.valid_from)
+         from task_status_history t3
+         where t3.task_id = sf.task_id
+           and t3.valid_from > sf.valid_from
+     )) 
+select *
+from status_flow
+order by task_id, valid_from;
 

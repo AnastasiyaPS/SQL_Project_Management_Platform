@@ -20,4 +20,3 @@ create index ind_task_due_date  on task(due_date);
 --уникальный индекс для текущего статуса задачи
 create unique index uq_task_status
 on task_status_history(task_id) where is_current = true;
-
